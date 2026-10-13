@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_34-f7ce03ff26f6406eea14048c900a448b7b134c4c",
+  "solcVersion": "0.8.34",
+  "solcLongVersion": "0.8.34+commit.80d5c536",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.19.0"
+  },
+  "userSourceNameMap": {
+    "contracts/ParticipantRegistry.sol": "project/contracts/ParticipantRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/ParticipantRegistry.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity ^0.8.34;\r\n\r\n\r\ncontract ParticipantRegistry {\r\n    \r\n    struct Participant {\r\n        address account; \r\n        uint256 registeredAt; \r\n        bool exists; \r\n    } \r\n\r\n    address public immutable organizer;\r\n    mapping(address => Participant) private participants;\r\n    address[] private participantList;\r\n    event ParticipantRegistered(address indexed account, uint256 registeredAt);\r\n    \r\n    constructor() {\r\n        organizer = msg.sender; \r\n    } \r\n    \r\n    function register() external {\r\n        require(!participants[msg.sender].exists, \"Already registered\"); \r\n        participants[msg.sender] = Participant(msg.sender, block.timestamp, true); \r\n        participantList.push(msg.sender); \r\n        emit ParticipantRegistered(msg.sender, block.timestamp); \r\n    } \r\n    \r\n    function getParticipant(address account) external view returns (address, uint256, bool) {\r\n        Participant memory participant = participants[account]; \r\n        return (participant.account, participant.registeredAt, participant.exists); \r\n    } \r\n    \r\n    function getParticipantCount() external view returns (uint256) {\r\n        return participantList.length; \r\n    } \r\n    \r\n    function getParticipantAt(uint256 index) external view returns (address) {\r\n        require(index < participantList.length, \"Invalid index\"); \r\n        return participantList[index]; \r\n    } \r\n} "
+      }
+    }
+  }
+}

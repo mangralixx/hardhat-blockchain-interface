@@ -1,0 +1,21 @@
+npm init -y
+npx hardhat --init
+npm install --save-dev hardhat
+npx hardhat compile
+npx hardhat test
+npx hardhat node
+
+# Компіляція контрактів
+npx hardhat compile
+
+# Запуск блокчейну
+npx hardhat node
+
+# Використання тимчасової Hardhat Network
+npx hardhat ignition deploy ignition/modules/Counter.ts
+
+# Деплой в блокчейн
+npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost
+
+# Деплой в блокчейн
+npx hardhat ignition deploy ignition/modules/EventFoundModule.ts --network localhost

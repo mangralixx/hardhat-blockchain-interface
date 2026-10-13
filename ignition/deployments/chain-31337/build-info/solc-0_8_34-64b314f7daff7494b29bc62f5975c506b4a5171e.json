@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_34-64b314f7daff7494b29bc62f5975c506b4a5171e",
+  "solcVersion": "0.8.34",
+  "solcLongVersion": "0.8.34+commit.80d5c536",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.19.0"
+  },
+  "userSourceNameMap": {
+    "contracts/EventFund.sol": "project/contracts/EventFund.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/EventFund.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity ^0.8.34;\r\n\r\ninterface IParticipantRegistry {\r\n    function getParticipant(address account) external view returns (address, uint256, bool); \r\n}\r\ncontract EventFund {\r\n    address public immutable owner;\r\n    IParticipantRegistry public immutable registry;\r\n    address public manager;\r\n    bool public managerConfigured;\r\n    bool public cancelled;\r\n    bool public released;\r\n    mapping(address => uint256) public contributions;\r\n    uint256 public totalContributions;\r\n    event ContributionReceived(address indexed account, uint256 amount);\r\n    event ContributionRefunded(address indexed account, uint256 amount);\r\n    event FundsReleased(address indexed recipient, uint256 amount);\r\n    constructor(address registryAddress) {\r\n        require(registryAddress != address(0), \"Invalid registry\");\r\n        owner = msg.sender;\r\n        registry = IParticipantRegistry(registryAddress);\r\n    }\r\n\r\n    function setManager(address managerAddress) external {\r\n        require(msg.sender == owner, \"Only owner\");\r\n        require(!managerConfigured, \"Manager already set\");\r\n        require(managerAddress != address(0), \"Invalid manager\");\r\n        manager = managerAddress;\r\n        managerConfigured = true;\r\n    }\r\n\t\r\n    function contribute() external payable {\r\n        require(managerConfigured, \"Manager not configured\");\r\n        require(!cancelled && !released, \"Fund is closed\");\r\n        require(msg.value > 0, \"Contribution must be positive\");\r\n        (,, bool exists) = registry.getParticipant(msg.sender);\r\n        require(exists, \"Register first\");\r\n        contributions[msg.sender] += msg.value;\r\n        totalContributions += msg.value;\r\n        emit ContributionReceived(msg.sender, msg.value);\r\n    }\r\n\r\n    function cancel() external {\r\n        require(msg.sender == manager, \"Only manager\");\r\n        require(!released, \"Already released\");\r\n        cancelled = true;\r\n    }\r\n\r\n    function refund() external {\r\n        require(cancelled, \"Event not cancelled\"); \r\n        uint256 amount = contributions[msg.sender]; \r\n        require(amount > 0, \"Nothing to refund\"); \r\n        contributions[msg.sender] = 0; \r\n        totalContributions -= amount; \r\n        (bool success, ) = payable(msg.sender).call{value: amount}(\"\"); \r\n        require(success, \"Refund failed\"); \r\n        emit ContributionRefunded(msg.sender, amount); \r\n    } \r\n\r\n    \r\n    function releaseToOrganizer(address payable recipient) external {\r\n        require(msg.sender == manager, \"Only manager\"); \r\n        require(!cancelled && !released, \"Fund is closed\"); \r\n        require(recipient != address(0), \"Invalid recipient\"); \r\n        released = true; \r\n        uint256 amount = address(this).balance; \r\n        totalContributions = 0; \r\n        (bool success, ) = recipient.call{value: amount}(\"\"); \r\n        require(success, \"Transfer failed\"); \r\n        emit FundsReleased(recipient, amount); \r\n    } \r\n\r\n    \r\n    function getBalance() external view returns (uint256) {\r\n        return address(this).balance; \r\n    } \r\n\r\n    \r\n    receive() external payable {\r\n        revert(\"Use contribute()\"); \r\n    } \r\n}"
+      }
+    }
+  }
+}

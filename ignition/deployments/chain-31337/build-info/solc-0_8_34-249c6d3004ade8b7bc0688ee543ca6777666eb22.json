@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_34-249c6d3004ade8b7bc0688ee543ca6777666eb22",
+  "solcVersion": "0.8.34",
+  "solcLongVersion": "0.8.34+commit.80d5c536",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.19.0"
+  },
+  "userSourceNameMap": {
+    "contracts/EventManager.sol": "project/contracts/EventManager.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/EventManager.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\r\npragma solidity ^0.8.34;\r\n\r\n\r\ninterface IEventFund {\r\n    function cancel() external; \r\n    function releaseToOrganizer(address payable recipient) external; \r\n} \r\n\r\n\r\ncontract EventManager {\r\n    address public immutable organizer;\r\n    address public immutable registry;\r\n    IEventFund public immutable fund;\r\n    bool public eventStarted;\r\n    bool public eventCancelled;\r\n    event EventStarted(address indexed organizer, uint256 timestamp);\r\n    event EventCancelled(address indexed organizer, uint256 timestamp);\r\n    \r\n    constructor(address registryAddress, address fundAddress) {\r\n        require(registryAddress != address(0), \"Invalid registry\"); \r\n        require(fundAddress != address(0), \"Invalid fund\"); \r\n        organizer = msg.sender; \r\n        registry = registryAddress; \r\n        fund = IEventFund(fundAddress); \r\n    } \r\n    \r\n    function startEvent() external {\r\n        require(msg.sender == organizer, \"Only organizer\"); \r\n        require(!eventStarted && !eventCancelled, \"Event already closed\"); \r\n        eventStarted = true; \r\n        fund.releaseToOrganizer(payable(organizer)); \r\n        emit EventStarted(organizer, block.timestamp); \r\n    } \r\n    \r\n    function cancelEvent() external {\r\n        require(msg.sender == organizer, \"Only organizer\"); \r\n        require(!eventStarted && !eventCancelled, \"Event already closed\"); \r\n        eventCancelled = true; \r\n        fund.cancel(); \r\n        emit EventCancelled(organizer, block.timestamp); \r\n    } \r\n} "
+      }
+    }
+  }
+}

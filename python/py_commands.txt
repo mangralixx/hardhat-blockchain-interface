@@ -1,0 +1,8 @@
+#Перехід в python
+cd python
+
+#Встановлення бібліотек
+pip install web3
+
+#Збереження списку бібліотек
+pip freeze > requirements.txt
